@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рецепт | Кулинарная книга</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i> На главную
+        </a>
+        <h1 id="recipeTitle">Название рецепта</h1>
+        <button id="editRecipeBtn" class="btn btn-edit">
+            <i class="fas fa-pencil-alt"></i>
+        </button>
+    </header>
+
+    <main class="recipe-container">
+        <div class="recipe-image">
+            <img src="https://source.unsplash.com/random/800x600/?food" alt="Фото блюда" id="recipeImage">
+        </div>
+        <div class="recipe-details">
+            <section>
+                <h2><i class="fas fa-list-ul"></i> Ингредиенты</h2>
+                <ul id="ingredientsList"></ul>
+            </section>
+            <section>
+                <h2><i class="fas fa-mortar-pestle"></i> Приготовление</h2>
+                <ol id="instructionsList"></ol>
+            </section>
+        </div>
+    </main>
+
+    <!-- Модальное окно для пароля -->
+    <div class="modal" id="passwordModal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2><i class="fas fa-lock"></i> Требуется пароль</h2>
+            <input type="password" id="passwordInput" placeholder="Введите пароль">
+            <button id="confirmPassword" class="btn btn-primary">Подтвердить</button>
+            <p id="passwordError" class="error-message"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
