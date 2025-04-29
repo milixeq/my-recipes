@@ -19,26 +19,31 @@ const elements = {
     passwordError: document.getElementById("passwordError"),
     closeModal: document.querySelector(".close"),
     
-    // Страница рецепта
+    // Страница рецепта (режим просмотра)
     recipeTitle: document.getElementById("recipeTitle"),
+    recipeImageContainer: document.getElementById("recipeImageContainer"),
     recipeImage: document.getElementById("recipeImage"),
     ingredientsList: document.getElementById("ingredientsList"),
     instructionsList: document.getElementById("instructionsList"),
     editRecipeBtn: document.getElementById("editRecipeBtn"),
+    recipeViewMode: document.getElementById("recipeViewMode"),
     
-    // Редактирование
-    editTitle: document.getElementById("editTitle"),
-    recipeName: document.getElementById("recipeName"),
-    recipeIngredients: document.getElementById("recipeIngredients"),
-    recipeInstructions: document.getElementById("recipeInstructions"),
-    saveRecipeBtn: document.getElementById("saveRecipeBtn")
+    // Режим редактирования
+    recipeEditMode: document.getElementById("recipeEditMode"),
+    editRecipeName: document.getElementById("editRecipeName"),
+    editRecipeImage: document.getElementById("editRecipeImage"),
+    editRecipeIngredients: document.getElementById("editRecipeIngredients"),
+    editRecipeInstructions: document.getElementById("editRecipeInstructions"),
+    saveChangesBtn: document.getElementById("saveChangesBtn"),
+    cancelEditBtn: document.getElementById("cancelEditBtn")
 };
 
 // Текущее состояние
 let state = {
     recipes: [],
     currentRecipeId: null,
-    passwordCallback: null
+    passwordCallback: null,
+    isEditMode: false
 };
 
 // Инициализация приложения
@@ -53,11 +58,6 @@ function initApp() {
     // Если это страница рецепта - загружаем данные
     if (window.location.pathname.includes("recipe.html")) {
         loadRecipePage();
-    }
-    
-    // Если это страница редактирования - загружаем данные
-    if (window.location.pathname.includes("edit-recipe.html")) {
-        loadEditPage();
     }
 }
 
@@ -90,7 +90,7 @@ function loadRecipes() {
 function renderRecipes(recipes) {
     elements.recipesGrid.innerHTML = recipes.map(recipe => `
         <div class="recipe-card" onclick="openRecipe(${recipe.id})">
-            <img src="${recipe.image || 'https://source.unsplash.com/random/300x200/?food'}" alt="${recipe.title}">
+            ${recipe.image ? `<img src="${recipe.image}" alt="${recipe.title}">` : ''}
             <h3>${recipe.title}</h3>
         </div>
     `).join("");
@@ -113,76 +113,77 @@ function loadRecipePage() {
     
     // Заполняем данные рецепта
     elements.recipeTitle.textContent = recipe.title;
-    elements.recipeImage.src = recipe.image || "https://source.unsplash.com/random/800x600/?food";
+    
+    // Изображение (показываем только если есть)
+    if (recipe.image) {
+        elements.recipeImage.src = recipe.image;
+        elements.recipeImageContainer.classList.remove("hidden");
+    } else {
+        elements.recipeImageContainer.classList.add("hidden");
+    }
     
     // Ингредиенты
     elements.ingredientsList.innerHTML = recipe.ingredients
         .split("\n")
+        .filter(item => item.trim() !== "")
         .map(item => `<li>${item}</li>`)
         .join("");
     
     // Инструкции
     elements.instructionsList.innerHTML = recipe.instructions
         .split("\n")
+        .filter(step => step.trim() !== "")
         .map(step => `<li>${step}</li>`)
         .join("");
 }
 
-function loadEditPage() {
-    const recipeId = getRecipeIdFromUrl();
+function enableEditMode() {
+    const recipe = getRecipeById(state.currentRecipeId);
     
-    if (recipeId) {
-        // Редактирование существующего рецепта
-        const recipe = getRecipeById(recipeId);
-        if (!recipe) {
-            window.location.href = "index.html";
-            return;
-        }
-        
-        state.currentRecipeId = recipeId;
-        elements.editTitle.textContent = "Редактировать рецепт";
-        elements.recipeName.value = recipe.title;
-        elements.recipeIngredients.value = recipe.ingredients;
-        elements.recipeInstructions.value = recipe.instructions;
-    } else {
-        // Создание нового рецепта
-        state.currentRecipeId = null;
-        elements.editTitle.textContent = "Новый рецепт";
-    }
+    // Заполняем форму редактирования
+    elements.editRecipeName.value = recipe.title;
+    elements.editRecipeImage.value = recipe.image || "";
+    elements.editRecipeIngredients.value = recipe.ingredients;
+    elements.editRecipeInstructions.value = recipe.instructions;
+    
+    // Переключаем режимы
+    elements.recipeViewMode.style.display = "none";
+    elements.recipeEditMode.style.display = "block";
+    state.isEditMode = true;
 }
 
-function saveRecipe() {
-    const title = elements.recipeName.value.trim();
-    const ingredients = elements.recipeIngredients.value.trim();
-    const instructions = elements.recipeInstructions.value.trim();
+function disableEditMode() {
+    elements.recipeViewMode.style.display = "block";
+    elements.recipeEditMode.style.display = "none";
+    state.isEditMode = false;
+}
+
+function saveRecipeChanges() {
+    const title = elements.editRecipeName.value.trim();
+    const image = elements.editRecipeImage.value.trim();
+    const ingredients = elements.editRecipeIngredients.value.trim();
+    const instructions = elements.editRecipeInstructions.value.trim();
     
     if (!title || !ingredients || !instructions) {
-        alert("Заполните все поля!");
+        alert("Заполните все обязательные поля!");
         return;
     }
     
-    const recipeData = {
-        id: state.currentRecipeId || Date.now(),
-        title,
-        ingredients,
-        instructions,
-        image: "https://source.unsplash.com/random/800x600/?food," + title.toLowerCase()
-    };
-    
-    // Обновляем или добавляем рецепт
-    if (state.currentRecipeId) {
-        // Обновление
-        const index = state.recipes.findIndex(r => r.id === state.currentRecipeId);
-        if (index !== -1) {
-            state.recipes[index] = recipeData;
-        }
-    } else {
-        // Добавление
-        state.recipes.push(recipeData);
+    // Обновляем рецепт
+    const index = state.recipes.findIndex(r => r.id === state.currentRecipeId);
+    if (index !== -1) {
+        state.recipes[index] = {
+            ...state.recipes[index],
+            title,
+            image: image || null,
+            ingredients,
+            instructions
+        };
+        
+        saveRecipesToStorage();
+        loadRecipePage(); // Перезагружаем данные
+        disableEditMode();
     }
-    
-    saveRecipesToStorage();
-    window.location.href = "index.html";
 }
 
 // ======================
@@ -234,6 +235,16 @@ function checkPassword() {
     }
 }
 
+function searchRecipes() {
+    const searchTerm = elements.searchInput.value.toLowerCase();
+    const filtered = state.recipes.filter(recipe => 
+        recipe.title.toLowerCase().includes(searchTerm) ||
+        recipe.ingredients.toLowerCase().includes(searchTerm) ||
+        recipe.instructions.toLowerCase().includes(searchTerm)
+    );
+    renderRecipes(filtered);
+}
+
 // ======================
 // Обработчики событий
 // ======================
@@ -243,7 +254,7 @@ function setupEventListeners() {
     if (elements.addRecipeBtn) {
         elements.addRecipeBtn.addEventListener("click", () => {
             showPasswordModal(() => {
-                window.location.href = "edit-recipe.html";
+                window.location.href = "recipe.html?new=true";
             });
         });
     }
@@ -259,14 +270,18 @@ function setupEventListeners() {
     if (elements.editRecipeBtn) {
         elements.editRecipeBtn.addEventListener("click", () => {
             showPasswordModal(() => {
-                window.location.href = `edit-recipe.html?id=${state.currentRecipeId}`;
+                enableEditMode();
             });
         });
     }
     
-    // Редактирование
-    if (elements.saveRecipeBtn) {
-        elements.saveRecipeBtn.addEventListener("click", saveRecipe);
+    // Режим редактирования
+    if (elements.saveChangesBtn) {
+        elements.saveChangesBtn.addEventListener("click", saveRecipeChanges);
+    }
+    
+    if (elements.cancelEditBtn) {
+        elements.cancelEditBtn.addEventListener("click", disableEditMode);
     }
     
     // Модальное окно
@@ -284,16 +299,6 @@ function setupEventListeners() {
             hidePasswordModal();
         }
     });
-}
-
-function searchRecipes() {
-    const searchTerm = elements.searchInput.value.toLowerCase();
-    const filtered = state.recipes.filter(recipe => 
-        recipe.title.toLowerCase().includes(searchTerm) ||
-        recipe.ingredients.toLowerCase().includes(searchTerm) ||
-        recipe.instructions.toLowerCase().includes(searchTerm)
-    );
-    renderRecipes(filtered);
 }
 
 // Глобальные функции для использования в HTML
