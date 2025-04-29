@@ -104,21 +104,16 @@ h1 {
     box-shadow: var(--shadow);
     transition: transform 0.3s ease;
     cursor: pointer;
+    padding: 1rem;
 }
 
 .recipe-card:hover {
     transform: translateY(-5px);
 }
 
-.recipe-card img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-}
-
 .recipe-card h3 {
-    padding: 1rem;
-    margin: 0;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
 }
 
 .recipe-container {
@@ -127,20 +122,12 @@ h1 {
     padding: 2rem;
 }
 
-.recipe-image {
-    margin-bottom: 2rem;
-}
-
-.recipe-image img {
-    width: 100%;
-    max-height: 400px;
-    object-fit: cover;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-}
-
 .recipe-details section {
     margin-bottom: 2rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
 }
 
 .recipe-details h2 {
@@ -229,7 +216,6 @@ h1 {
     display: none !important;
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
     header {
         flex-direction: column;
