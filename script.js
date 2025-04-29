@@ -1,239 +1,243 @@
-:root {
-    --primary: #ff6b6b;
-    --secondary: #ff8e8e;
-    --dark: #333;
-    --light: #f9f9f9;
-    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
+// Конфигурация
+const CONFIG = {
+    PASSWORD: "mili36",
+    STORAGE_KEY: "mili-recipes"
+};
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+// DOM элементы
+const elements = {
+    // Главная страница
+    recipesGrid: document.getElementById("recipesGrid"),
+    searchInput: document.getElementById("searchInput"),
+    searchBtn: document.getElementById("searchBtn"),
+    addRecipeBtn: document.getElementById("addRecipeBtn"),
+    
+    // Модальное окно
+    passwordModal: document.getElementById("passwordModal"),
+    passwordInput: document.getElementById("passwordInput"),
+    confirmPassword: document.getElementById("confirmPassword"),
+    passwordError: document.getElementById("passwordError"),
+    closeModal: document.querySelector(".close"),
+    
+    // Страница рецепта
+    recipeTitle: document.getElementById("recipeTitle"),
+    ingredientsList: document.getElementById("ingredientsList"),
+    instructionsList: document.getElementById("instructionsList"),
+    editRecipeBtn: document.getElementById("editRecipeBtn"),
+    recipeViewMode: document.getElementById("recipeViewMode"),
+    
+    // Режим редактирования
+    recipeEditMode: document.getElementById("recipeEditMode"),
+    editRecipeName: document.getElementById("editRecipeName"),
+    editRecipeIngredients: document.getElementById("editRecipeIngredients"),
+    editRecipeInstructions: document.getElementById("editRecipeInstructions"),
+    saveChangesBtn: document.getElementById("saveChangesBtn"),
+    cancelEditBtn: document.getElementById("cancelEditBtn")
+};
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--light);
-    color: var(--dark);
-    line-height: 1.6;
-}
+// Текущее состояние
+let state = {
+    recipes: [],
+    currentRecipeId: null,
+    passwordCallback: null,
+    isEditMode: false
+};
 
-header {
-    background: white;
-    padding: 1rem 2rem;
-    box-shadow: var(--shadow);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
+// Инициализация приложения
+document.addEventListener("DOMContentLoaded", () => {
+    initApp();
+});
 
-h1 {
-    color: var(--primary);
-    font-size: 1.8rem;
-}
-
-.btn {
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
-    border: none;
-}
-
-.btn-primary {
-    background: var(--primary);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: var(--secondary);
-    transform: translateY(-2px);
-}
-
-.btn-back {
-    background: transparent;
-    color: var(--dark);
-    border: 1px solid #ddd;
-}
-
-.btn-edit {
-    background: transparent;
-    color: var(--primary);
-    border: 1px solid var(--primary);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.search-container {
-    display: flex;
-    gap: 0.5rem;
-    flex-grow: 1;
-    margin: 0 2rem;
-}
-
-.search-container input {
-    flex-grow: 1;
-    padding: 0.5rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
-
-.recipes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2rem;
-    padding: 2rem;
-}
-
-.recipe-card {
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    transition: transform 0.3s ease;
-    cursor: pointer;
-    padding: 1rem;
-}
-
-.recipe-card:hover {
-    transform: translateY(-5px);
-}
-
-.recipe-card h3 {
-    color: var(--primary);
-    margin-bottom: 0.5rem;
-}
-
-.recipe-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.recipe-details section {
-    margin-bottom: 2rem;
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-}
-
-.recipe-details h2 {
-    color: var(--primary);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.recipe-details ul, .recipe-details ol {
-    padding-left: 2rem;
-}
-
-.recipe-details li {
-    margin-bottom: 0.5rem;
-}
-
-.edit-mode {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    margin-top: 2rem;
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-}
-
-.form-group input,
-.form-group textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-family: inherit;
-}
-
-.form-group textarea {
-    min-height: 150px;
-    resize: vertical;
-}
-
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-}
-
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background: white;
-    padding: 2rem;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: var(--shadow);
-}
-
-.error-message {
-    color: red;
-    margin-top: 1rem;
-    text-align: center;
-}
-
-.hidden {
-    display: none !important;
-}
-
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1rem;
+function initApp() {
+    loadRecipes();
+    setupEventListeners();
+    
+    if (window.location.pathname.includes("recipe.html")) {
+        loadRecipePage();
     }
+}
 
-    .search-container {
-        margin: 0;
-        width: 100%;
+// ======================
+// Основные функции
+// ======================
+
+function loadRecipes() {
+    const savedRecipes = localStorage.getItem(CONFIG.STORAGE_KEY);
+    state.recipes = savedRecipes ? JSON.parse(savedRecipes) : [
+        {
+            id: 1,
+            title: "Блинчики",
+            ingredients: "Мука - 200 г\nЯйца - 2 шт.\nМолоко - 300 мл",
+            instructions: "1. Смешать ингредиенты\n2. Жарить на сковороде\n3. Подавать с джемом"
+        }
+    ];
+    
+    if (elements.recipesGrid) {
+        renderRecipes();
     }
+}
 
-    .recipes-grid {
-        grid-template-columns: 1fr;
-        padding: 1rem;
+function renderRecipes() {
+    elements.recipesGrid.innerHTML = state.recipes.map(recipe => `
+        <div class="recipe-card" onclick="openRecipe(${recipe.id})">
+            <h3>${recipe.title}</h3>
+            <p>${recipe.ingredients.split("\n")[0]}...</p>
+        </div>
+    `).join("");
+}
+
+function openRecipe(id) {
+    window.location.href = `recipe.html?id=${id}`;
+}
+
+function loadRecipePage() {
+    const recipeId = parseInt(new URLSearchParams(window.location.search).get("id"));
+    const recipe = state.recipes.find(r => r.id === recipeId);
+    
+    if (!recipe) {
+        window.location.href = "index.html";
+        return;
     }
     
-    .recipe-container {
-        padding: 1rem;
+    state.currentRecipeId = recipeId;
+    
+    elements.recipeTitle.textContent = recipe.title;
+    elements.ingredientsList.innerHTML = recipe.ingredients.split("\n").map(i => `<li>${i}</li>`).join("");
+    elements.instructionsList.innerHTML = recipe.instructions.split("\n").map(s => `<li>${s}</li>`).join("");
+}
+
+function enableEditMode() {
+    const recipe = state.recipes.find(r => r.id === state.currentRecipeId);
+    
+    elements.editRecipeName.value = recipe.title;
+    elements.editRecipeIngredients.value = recipe.ingredients;
+    elements.editRecipeInstructions.value = recipe.instructions;
+    
+    elements.recipeViewMode.style.display = "none";
+    elements.recipeEditMode.style.display = "block";
+    state.isEditMode = true;
+}
+
+function disableEditMode() {
+    elements.recipeViewMode.style.display = "block";
+    elements.recipeEditMode.style.display = "none";
+    state.isEditMode = false;
+}
+
+function saveRecipeChanges() {
+    const title = elements.editRecipeName.value.trim();
+    const ingredients = elements.editRecipeIngredients.value.trim();
+    const instructions = elements.editRecipeInstructions.value.trim();
+    
+    if (!title || !ingredients || !instructions) {
+        alert("Заполните все поля!");
+        return;
+    }
+    
+    const recipeIndex = state.recipes.findIndex(r => r.id === state.currentRecipeId);
+    state.recipes[recipeIndex] = {
+        ...state.recipes[recipeIndex],
+        title,
+        ingredients,
+        instructions
+    };
+    
+    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.recipes));
+    loadRecipePage();
+    disableEditMode();
+}
+
+function showPasswordModal(callback) {
+    state.passwordCallback = callback;
+    elements.passwordModal.style.display = "flex";
+    elements.passwordInput.value = "";
+    elements.passwordError.textContent = "";
+}
+
+function hidePasswordModal() {
+    elements.passwordModal.style.display = "none";
+}
+
+function checkPassword() {
+    if (elements.passwordInput.value === CONFIG.PASSWORD) {
+        hidePasswordModal();
+        state.passwordCallback();
+    } else {
+        elements.passwordError.textContent = "Неверный пароль!";
     }
 }
+
+function searchRecipes() {
+    const term = elements.searchInput.value.toLowerCase();
+    const filtered = state.recipes.filter(recipe => 
+        recipe.title.toLowerCase().includes(term) ||
+        recipe.ingredients.toLowerCase().includes(term)
+    );
+    
+    elements.recipesGrid.innerHTML = filtered.map(recipe => `
+        <div class="recipe-card" onclick="openRecipe(${recipe.id})">
+            <h3>${recipe.title}</h3>
+            <p>${recipe.ingredients.split("\n")[0]}...</p>
+        </div>
+    `).join("");
+}
+
+function setupEventListeners() {
+    // Главная страница
+    if (elements.addRecipeBtn) {
+        elements.addRecipeBtn.addEventListener("click", () => {
+            showPasswordModal(() => {
+                const newId = Date.now();
+                state.recipes.push({
+                    id: newId,
+                    title: "Новый рецепт",
+                    ingredients: "",
+                    instructions: ""
+                });
+                localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.recipes));
+                openRecipe(newId);
+                setTimeout(enableEditMode, 100);
+            });
+        });
+    }
+    
+    if (elements.searchBtn) {
+        elements.searchBtn.addEventListener("click", searchRecipes);
+        elements.searchInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") searchRecipes();
+        });
+    }
+    
+    // Страница рецепта
+    if (elements.editRecipeBtn) {
+        elements.editRecipeBtn.addEventListener("click", () => {
+            showPasswordModal(enableEditMode);
+        });
+    }
+    
+    if (elements.saveChangesBtn) {
+        elements.saveChangesBtn.addEventListener("click", saveRecipeChanges);
+    }
+    
+    if (elements.cancelEditBtn) {
+        elements.cancelEditBtn.addEventListener("click", disableEditMode);
+    }
+    
+    // Модальное окно
+    if (elements.confirmPassword) {
+        elements.confirmPassword.addEventListener("click", checkPassword);
+    }
+    
+    if (elements.closeModal) {
+        elements.closeModal.addEventListener("click", hidePasswordModal);
+    }
+    
+    window.addEventListener("click", (e) => {
+        if (e.target === elements.passwordModal) {
+            hidePasswordModal();
+        }
+    });
+}
+
+// Глобальные функции
+window.openRecipe = openRecipe;
