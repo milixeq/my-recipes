@@ -19,18 +19,52 @@
     </header>
 
     <main class="recipe-container">
-        <div class="recipe-image">
-            <img src="https://source.unsplash.com/random/800x600/?food" alt="Фото блюда" id="recipeImage">
+        <div id="recipeViewMode">
+            <div class="recipe-image" id="recipeImageContainer">
+                <img src="" alt="Фото блюда" id="recipeImage">
+            </div>
+            <div class="recipe-details">
+                <section>
+                    <h2><i class="fas fa-list-ul"></i> Ингредиенты</h2>
+                    <ul id="ingredientsList"></ul>
+                </section>
+                <section>
+                    <h2><i class="fas fa-mortar-pestle"></i> Приготовление</h2>
+                    <ol id="instructionsList"></ol>
+                </section>
+            </div>
         </div>
-        <div class="recipe-details">
-            <section>
-                <h2><i class="fas fa-list-ul"></i> Ингредиенты</h2>
-                <ul id="ingredientsList"></ul>
-            </section>
-            <section>
-                <h2><i class="fas fa-mortar-pestle"></i> Приготовление</h2>
-                <ol id="instructionsList"></ol>
-            </section>
+
+        <div id="recipeEditMode" class="edit-mode" style="display: none;">
+            <div class="form-group">
+                <label for="editRecipeName">Название рецепта</label>
+                <input type="text" id="editRecipeName">
+            </div>
+            
+            <div class="form-group">
+                <label for="editRecipeImage">Изображение (URL)</label>
+                <input type="text" id="editRecipeImage" placeholder="Введите URL изображения">
+                <small>Оставьте пустым, если не нужно изображение</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="editRecipeIngredients">Ингредиенты (каждый с новой строки)</label>
+                <textarea id="editRecipeIngredients" rows="6"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="editRecipeInstructions">Инструкция приготовления</label>
+                <textarea id="editRecipeInstructions" rows="10"></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button id="saveChangesBtn" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Сохранить
+                </button>
+                <button id="cancelEditBtn" class="btn btn-back">
+                    <i class="fas fa-times"></i> Отменить
+                </button>
+            </div>
         </div>
     </main>
 
@@ -38,8 +72,8 @@
     <div class="modal" id="passwordModal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2><i class="fas fa-lock"></i> Требуется пароль</h2>
-            <input type="password" id="passwordInput" placeholder="Введите пароль">
+            <h2><i class="fas fa-lock"></i> Введите пароль</h2>
+            <input type="password" id="passwordInput" placeholder="Пароль">
             <button id="confirmPassword" class="btn btn-primary">Подтвердить</button>
             <p id="passwordError" class="error-message"></p>
         </div>
